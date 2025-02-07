@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>START QUIZ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <style>
+        body{
+            background-color: #b5ffff;
+        }
+        .container{
+            background-color: white;
+            width: 100%;
+            padding: 40px;
+            border-radius: 20px;
+        }
+        .timer{
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: right;
+            margin-bottom: 20px;
+            padding:20px;
+        }
+        button{
+            display: block;
+            background-color: green;
+            width:100%;
+            max-width: 300px;
+            padding:10px;
+            cursor:pointer;
+            margin:10px;
+            border-radius: 10px;
+            border:none;
+        }
+        button:hover{
+            color: lawngreen;
+        }
+        h2{
+            text-align: center;
+            font-family: "SansSerif";
+
+        }
+
+    </style>
+</head>
+<body>
+    <div class = "timer">Time Left: <span id = "time">seconds</span></div>
+    <h2 class = display-6><u>{{ quiz.quiz_name }}</u></h2>
+
+    <div class = container>
+    <form id = "quiz" action="{{ url_for('submit_quiz', quiz_id = quiz.id)}}" method  = 'POST'>
+        {% for question in questions %}
+            <p><b>Q{{ loop.index }}: {{ question.question }}</b></p>
+            <input type="radio" name = "q{{ question.id }}" value = "1"/> {{ question.option1 }}<br>
+            <input type="radio" name = "q{{ question.id }}" value = "2"/> {{ question.option2 }}<br>
+            <input type="radio" name = "q{{ question.id }}" value = "3"/> {{ question.option3 }}<br>
+            <input type="radio" name = "q{{ question.id }}" value = "4"/> {{ question.option4 }}<br>
+        {% endfor %}
+        <button type = "submit">Submit</button>
+    </form>
+    </div>
+
+    <script>
+        var time_left = {{ quiz.duration|int*60 }};
+        var timer = setInterval(() =>{
+            var minutes = Math.floor(time_left/60);
+            var seconds = time_left % 60;
+            document.getElementById('time').textContent = `${minutes}:${seconds<10 ? "0" + seconds:seconds}`;
+            if (time_left <= 0){
+                clearInterval(timer);
+                localStorage.removeItem("quiz_timer")
+                alert("Your Time's Up! Quiz will automatically submit.");
+                document.getElementById("quiz").submit();
+                window.location.href = "{{ url_for('user_scores',quiz_id = quiz.id) }}";
+            }
+            time_left--;
+        },1000);
+
+
+    </script>
+</body>
+</html>
